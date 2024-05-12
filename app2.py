@@ -10,12 +10,16 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
 def main():
     st.title("Hello, World! EDA Streamlit App")
+    
+
 
     st.header("Upload your CSV data file")
     data_file = st.file_uploader("Upload CSV", type=["csv"])
+
 
     data = None  # Initialize data as None
 
@@ -28,6 +32,25 @@ def main():
         st.sidebar.header("Visualizations")
         plot_options = ["Bar plot", "Scatter plot", "Histogram", "Box plot", "Heatmap"]
         selected_plot = st.sidebar.selectbox("Choose a plot type", plot_options)
+        selected_columns = []
+        if selected_plot in ["Bar plot", "Scatter plot"]:
+            selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key="plot_x_axis"))
+            selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key="plot_y_axis"))
+            
+        if st.sidebar.button("Plot"):
+            st.write(f"{selected_plot}:")
+            fig, ax = plt.subplots()
+            if selected_plot == "Bar plot":
+                sns.barplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
+            elif selected_plot == "Scatter plot":
+                sns.scatterplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
+            elif selected_plot == "Histogram":
+                sns.histplot(data[selected_columns[0]], bins=20, ax=ax)
+            elif selected_plot == "Box plot":
+                sns.boxplot(data[selected_columns[0]], ax=ax)
+            st.pyplot(fig)
+
+
 
         # Show number of null values in each column
         display_null_values_and_datatype(data)
@@ -75,6 +98,7 @@ def main():
             st.sidebar.success(f"Data type of column '{column_to_change}' changed to '{new_data_type}' successfully.")
             # Update data types display
             display_null_values_and_datatype(data)
+            
 
         # Sidebar for selecting the model type
         model_type = st.sidebar.selectbox("Select Model", ["KNN Classification", "Naive Bayes", "Linear Regression", "Logistic Regression", "Decision Tree", "Random Forest"])
@@ -92,10 +116,7 @@ def main():
         elif model_type == "Random Forest":
             apply_random_forest(data)
 
-        selected_columns = []
-        if selected_plot in ["Bar plot", "Scatter plot"]:
-            selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key="plot_x_axis"))
-            selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key="plot_y_axis"))
+
 
         if selected_plot == "Histogram":
             selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="histogram_column"))
@@ -109,18 +130,50 @@ def main():
             sns.heatmap(data.corr(), annot=True, cmap="coolwarm", fmt=".2f")
             st.pyplot(fig)
 
-        if st.sidebar.button("Plot"):
-            st.write(f"{selected_plot}:")
-            fig, ax = plt.subplots()
-            if selected_plot == "Bar plot":
-                sns.barplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
-            elif selected_plot == "Scatter plot":
-                sns.scatterplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
-            elif selected_plot == "Histogram":
-                sns.histplot(data[selected_columns[0]], bins=20, ax=ax)
-            elif selected_plot == "Box plot":
-                sns.boxplot(data[selected_columns[0]], ax=ax)
-            st.pyplot(fig)
+
+    st.sidebar.header("Normalization")
+    normalization_options = ["Standard Scaler", "Min-Max Scaler", "Robust Scaler"]
+    selected_normalization = st.sidebar.selectbox("Select normalization technique", normalization_options)
+
+    if st.sidebar.button("Normalize Data"):
+        if selected_normalization == "Standard Scaler":
+            data = standard_scaler_normalization(data)
+            st.sidebar.success("Data normalized using Standard Scaler.")
+        elif selected_normalization == "Min-Max Scaler":
+            data = min_max_scaler_normalization(data)
+            st.sidebar.success("Data normalized using Min-Max Scaler.")
+        elif selected_normalization == "Robust Scaler":
+            data = robust_scaler_normalization(data)
+            st.sidebar.success("Data normalized using Robust Scaler.")
+        else:
+            st.sidebar.error("Please select a normalization technique.")
+
+        # Update data display
+        st.write("Data overview (after normalization):")
+        st.write(data.head())
+
+    # Existing code...
+
+def standard_scaler_normalization(data):
+    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data[numeric_columns])
+    data[numeric_columns] = scaled_data
+    return data
+
+def min_max_scaler_normalization(data):
+    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+    scaler = MinMaxScaler()
+    scaled_data = scaler.fit_transform(data[numeric_columns])
+    data[numeric_columns] = scaled_data
+    return data
+
+def robust_scaler_normalization(data):
+    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+    scaler = RobustScaler()
+    scaled_data = scaler.fit_transform(data[numeric_columns])
+    data[numeric_columns] = scaled_data
+    return data
 
 def display_null_values_and_datatype(data):
     # Calculate null value counts and datatypes
@@ -136,16 +189,22 @@ def display_null_values_and_datatype(data):
 
 
 def fill_null_values(data, method, custom_value=None):
-    if method == "Mean":
-        data.fillna(data.mean(), inplace=True)
-    elif method == "Median":
-        data.fillna(data.median(), inplace=True)
-    elif method == "Mode":
-        data.fillna(data.mode().iloc[0], inplace=True)
-    elif method == "Most Frequent":
-        data.fillna(data.mode().iloc[0], inplace=True)  # Fills null values with the most frequent value
-    elif method == "Custom Value" and custom_value is not None:
-        data.fillna(custom_value, inplace=True)
+    for column in data.columns:
+        if data[column].dtype == 'object':
+            if method == "Custom Value" and custom_value is not None:
+                data[column].fillna(custom_value, inplace=True)
+            elif method == "Most Frequent":
+                most_frequent_value = data[column].mode().iloc[0]
+                data[column].fillna(most_frequent_value, inplace=True)
+        else:
+            if method == "Mean":
+                data[column].fillna(data[column].mean(), inplace=True)
+            elif method == "Median":
+                data[column].fillna(data[column].median(), inplace=True)
+            elif method == "Mode":
+                data[column].fillna(data[column].mode().iloc[0], inplace=True)
+            elif method == "Custom Value" and custom_value is not None:
+                data[column].fillna(custom_value, inplace=True)
     return data
 
 
@@ -156,10 +215,14 @@ def rename_column(data, old_column_name, new_column_name):
     data.rename(columns={old_column_name: new_column_name}, inplace=True)
     return data
 def change_data_type(data, column, new_type):
-    if new_type == "string":
+    if new_type == "datetime64":
+        new_type = "datetime64[ns]"  # Correct format for datetime
+    elif new_type == "string":
         new_type = "object"  # pandas dtype for string is 'object'
+
     data[column] = data[column].astype(new_type)
     return data
+
 
 def apply_knn_classification(data):
     st.sidebar.header("KNN Classification")
