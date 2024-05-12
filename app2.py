@@ -24,9 +24,17 @@ def main():
     data = None  # Initialize data as None
 
     if data_file is not None:
-        data = pd.read_csv(data_file, nrows=10000)  # Read only 10k rows of data
-        st.write("Data overview (first 10k rows):")
-        st.write(data.head())
+        data = pd.read_csv(data_file)  # Read the entire dataset
+        max_num_rows = len(data)  # Determine the maximum number of rows
+        
+        st.write("Data overview:")
+        st.write(data.head())  # Display the entire dataset
+        
+        # Slider for selecting the number of rows
+        num_rows = st.sidebar.slider("Select number of rows to use", min_value=100, max_value=max_num_rows, value=1000)
+        
+        st.write("Data overview (first {} rows):".format(num_rows))
+        st.write(data.head(num_rows))  # Display the selected number of rows
 
 
         st.sidebar.header("Visualizations")
@@ -36,19 +44,52 @@ def main():
         if selected_plot in ["Bar plot", "Scatter plot"]:
             selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key="plot_x_axis"))
             selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key="plot_y_axis"))
-            
+
+        if selected_plot == "Histogram":
+            selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="histogram_column"))
+
+        if selected_plot == "Box plot":
+            selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="boxplot_column"))
+
+        if selected_plot == "Heatmap":
+            st.write("Heatmap:")
+            fig, ax = plt.subplots()
+            sns.heatmap(data.corr(), annot=True, cmap="coolwarm", fmt=".2f")
+            st.pyplot(fig)
+        
+
         if st.sidebar.button("Plot"):
             st.write(f"{selected_plot}:")
-            fig, ax = plt.subplots()
-            if selected_plot == "Bar plot":
-                sns.barplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
-            elif selected_plot == "Scatter plot":
-                sns.scatterplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
-            elif selected_plot == "Histogram":
-                sns.histplot(data[selected_columns[0]], bins=20, ax=ax)
-            elif selected_plot == "Box plot":
-                sns.boxplot(data[selected_columns[0]], ax=ax)
-            st.pyplot(fig)
+            
+            # Dictionary to store plot requirements
+            plot_requirements = {
+                "Bar plot": "Two numeric columns are required. One for the x-axis and one for the y-axis.",
+                "Scatter plot": "Two numeric columns are required. One for the x-axis and one for the y-axis.",
+                "Histogram": "One numeric column is required.",
+                "Box plot": "One numeric column is required."
+            }
+            
+            # Display plot requirements
+            st.write(f"Data requirements for {selected_plot}:")
+            st.write(plot_requirements[selected_plot])
+            
+            # Check if selected columns have object dtype
+            if data[selected_columns[0]].dtype == 'object' or data[selected_columns[1]].dtype == 'object':
+                st.warning("Please change the data type of selected columns to numeric for plotting.")
+            else:
+                fig, ax = plt.subplots()
+                try:
+                    if selected_plot == "Bar plot":
+                        sns.barplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
+                    elif selected_plot == "Scatter plot":
+                        sns.scatterplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
+                    elif selected_plot == "Histogram":
+                        sns.histplot(data[selected_columns[0]], bins=20, ax=ax)
+                    elif selected_plot == "Box plot":
+                        sns.boxplot(data[selected_columns[0]], ax=ax)
+                    st.pyplot(fig)
+                except ValueError as e:
+                    st.error(f"An error occurred: {str(e)}. Please check your data and selected columns.")
 
 
 
@@ -118,17 +159,7 @@ def main():
 
 
 
-        if selected_plot == "Histogram":
-            selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="histogram_column"))
 
-        if selected_plot == "Box plot":
-            selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="boxplot_column"))
-
-        if selected_plot == "Heatmap":
-            st.write("Heatmap:")
-            fig, ax = plt.subplots()
-            sns.heatmap(data.corr(), annot=True, cmap="coolwarm", fmt=".2f")
-            st.pyplot(fig)
 
 
     st.sidebar.header("Normalization")
