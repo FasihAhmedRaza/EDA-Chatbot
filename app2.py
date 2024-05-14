@@ -258,184 +258,373 @@ def apply_knn_classification(data, state):
     feature_columns = st.multiselect("Select the feature columns", data.columns, key="knn_feature_columns")
     test_size = st.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
     random_state = st.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
-    k_value = st.slider("Select the value of k", min_value=1, max_value=10, value=5, step=1)
+    enable_user_inputs = st.radio("Enable user inputs", ["Yes", "No"])
 
-    # Collect user inputs for each feature column
-    user_inputs = {}
-    for column in feature_columns:
-        user_input = st.number_input(f"Enter value for '{column}'", key=f"knn_input_{column}")
-        user_inputs[column] = user_input
+    if enable_user_inputs == "Yes":
+        k_value = st.slider("Select the value of k", min_value=1, max_value=10, value=5, step=1)
 
-    if st.button("Apply KNN Classifier"):
-        if len(feature_columns) < 1:
-            st.error("Please select at least one feature column.")
-            return
+        # Collect user inputs for each feature column
+        user_inputs = {}
+        for column in feature_columns:
+            user_input = st.number_input(f"Enter value for '{column}'", key=f"knn_input_{column}")
+            user_inputs[column] = user_input
 
-        # Store user inputs in state
-        state['user_inputs'] = user_inputs
+        if st.button("Apply KNN Classifier"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
 
-        # Create a DataFrame with user inputs
-        user_df = pd.DataFrame([user_inputs])
+            # Store user inputs in state
+            state['user_inputs'] = user_inputs
 
-        # Load the dataset again to ensure consistency in column ordering
-        X = data[feature_columns]
-        y = data[target_column]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+            # Create a DataFrame with user inputs
+            user_df = pd.DataFrame([user_inputs])
 
-        # Train KNN model
-        knn_model = KNeighborsClassifier(n_neighbors=k_value)
-        knn_model.fit(X_train, y_train)
+            # Load the dataset again to ensure consistency in column ordering
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-        # Predict the target value for user inputs
-        predicted_value = knn_model.predict(user_df)
+            # Train KNN model
+            knn_model = KNeighborsClassifier(n_neighbors=k_value)
+            knn_model.fit(X_train, y_train)
 
-        # Display the predicted value along with user inputs
-        st.write("Predicted Target Value and User Inputs:")
-        user_inputs_df = pd.DataFrame([user_inputs])
-        predicted_value_df = pd.DataFrame({target_column: predicted_value})
-        combined_df = pd.concat([user_inputs_df, predicted_value_df], axis=1)
-        st.table(combined_df)
+            # Predict the target value for user inputs
+            predicted_value = knn_model.predict(user_df)
 
-        # Predict the target values for test data
-        y_pred = knn_model.predict(X_test)
+            # Display the predicted value along with user inputs
+            st.write("Predicted Target Value and User Inputs:")
+            user_inputs_df = pd.DataFrame([user_inputs])
+            predicted_value_df = pd.DataFrame({target_column: predicted_value})
+            combined_df = pd.concat([user_inputs_df, predicted_value_df], axis=1)
+            st.table(combined_df)
 
-        # Calculate accuracy on test data if available
-        accuracy = accuracy_score(y_test, y_pred)
-        st.write(f"Accuracy: {accuracy:.2f}")
+            # Predict the target values for test data
+            y_pred = knn_model.predict(X_test)
 
-        # Display classification report for test data
-        st.write("Classification Report:")
-        classification_rep = classification_report(y_test, y_pred, output_dict=True)
-        df_classification_rep = pd.DataFrame(classification_rep).transpose()
-        st.table(df_classification_rep)
+            # Calculate accuracy on test data if available
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy: {accuracy:.2f}")
 
-        # Update state to show the result
-        state['show_result'] = True
+            # Display classification report for test data
+            st.write("Classification Report:")
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.table(df_classification_rep)
 
+            # Update state to show the result
+            state['show_result'] = True
+
+    elif enable_user_inputs == "No":
+        if st.button("Apply KNN Classifier"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
+
+            # Load the dataset again to ensure consistency in column ordering
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+            # Train KNN model
+            knn_model = KNeighborsClassifier()
+            knn_model.fit(X_train, y_train)
+
+            # Predict the target values for test data
+            y_pred = knn_model.predict(X_test)
+
+            # Calculate accuracy on test data if available
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy: {accuracy:.2f}")
+
+            # Display classification report for test data
+            st.write("Classification Report:")
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.table(df_classification_rep)
+
+            # Update state to show the result
+            state['show_result'] = True
 
 
 
 
 
 def apply_naive_bayes(data):
-    st.sidebar.header("Naive Bayes")
+    st.header("Naive Bayes")
+    
+    target_column = st.selectbox("Select the target column", data.columns, key="nb_target_column")
+    feature_columns = st.multiselect("Select the feature columns", data.columns, key="nb_feature_columns")
+    test_size = st.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
+    random_state = st.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    enable_user_inputs = st.radio("Enable user inputs", ["Yes", "No"])
 
-    target_column = st.sidebar.selectbox("Select the target column", data.columns, key="nb_target_column")
-    feature_columns = st.sidebar.multiselect("Select the feature columns", data.columns, key="nb_feature_columns")
-    test_size = st.sidebar.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
-    random_state = st.sidebar.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    if enable_user_inputs == "Yes":
+        # Collect user inputs for each feature column
+        user_inputs = {}
+        for column in feature_columns:
+            user_input = st.number_input(f"Enter value for '{column}'", key=f"nb_input_{column}")
+            user_inputs[column] = user_input
 
-    if st.sidebar.button("Apply Naive Bayes"):
-        if len(feature_columns) < 1:
-            st.sidebar.error("Please select at least one feature column.")
-            return
+        if st.button("Apply Naive Bayes"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
 
-        X = data[feature_columns]
-        y = data[target_column]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+            # Create a DataFrame with user inputs
+            user_df = pd.DataFrame([user_inputs])
 
-        nb_model = GaussianNB()
-        nb_model.fit(X_train, y_train)
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-        y_pred = nb_model.predict(X_test)
+            nb_model = GaussianNB()
+            nb_model.fit(X_train, y_train)
 
-        accuracy = accuracy_score(y_test, y_pred)
-        st.write(f"Accuracy: {accuracy:.2f}")
+            y_pred = nb_model.predict(user_df)
 
-        classification_rep = classification_report(y_test, y_pred, output_dict=True)
-        df_classification_rep = pd.DataFrame(classification_rep).transpose()
-        st.write("Classification Report:")
-        st.table(df_classification_rep)
+            # Display the predicted value along with user inputs
+            st.write("Predicted Target Value and User Inputs:")
+            user_inputs_df = pd.DataFrame([user_inputs])
+            predicted_value_df = pd.DataFrame({target_column: y_pred})
+            combined_df = pd.concat([user_inputs_df, predicted_value_df], axis=1)
+            st.table(combined_df)
+
+            # Predict the target values for test data
+            y_pred_test = nb_model.predict(X_test)
+
+            # Calculate accuracy on test data if available
+            accuracy = accuracy_score(y_test, y_pred_test)
+            st.write(f"Accuracy on Test Data: {accuracy:.2f}")
+
+            # Display classification report for test data
+            st.write("Classification Report on Test Data:")
+            classification_rep = classification_report(y_test, y_pred_test, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.table(df_classification_rep)
+
+    elif enable_user_inputs == "No":
+        if st.button("Apply Naive Bayes"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
+
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+            nb_model = GaussianNB()
+            nb_model.fit(X_train, y_train)
+
+            y_pred = nb_model.predict(X_test)
+
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy: {accuracy:.2f}")
+
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.write("Classification Report:")
+            st.table(df_classification_rep)
 
 
 def apply_linear_regression(data):
-    st.sidebar.header("Linear Regression")
+    st.header("Linear Regression")
 
-    target_column = st.sidebar.selectbox("Select the target column", data.columns, key="linear_target_column")
-    feature_columns = st.sidebar.multiselect("Select the feature columns", data.columns, key="linear_feature_columns")
-    test_size = st.sidebar.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
-    random_state = st.sidebar.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    target_column = st.selectbox("Select the target column", data.columns, key="linear_target_column")
+    feature_columns = st.multiselect("Select the feature columns", data.columns, key="linear_feature_columns")
+    test_size = st.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
+    random_state = st.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    enable_user_inputs = st.radio("Enable user inputs", ["Yes", "No"])
 
-    if st.sidebar.button("Apply Linear Regression"):
-        if len(feature_columns) < 1:
-            st.sidebar.error("Please select at least one feature column.")
-            return
+    if enable_user_inputs == "Yes":
+        # Collect user inputs for each feature column
+        user_inputs = {}
+        for column in feature_columns:
+            user_input = st.number_input(f"Enter value for '{column}'", key=f"linear_input_{column}")
+            user_inputs[column] = user_input
 
-        X = data[feature_columns]
-        y = data[target_column]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+        if st.button("Apply Linear Regression"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
 
-        linear_model = LinearRegression()
-        linear_model.fit(X_train, y_train)
+            # Create a DataFrame with user inputs
+            user_df = pd.DataFrame([user_inputs])
 
-        y_pred = linear_model.predict(X_test)
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-        mse = mean_squared_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-        st.write(f"Mean Squared Error: {mse:.2f}")
-        st.write(f"R-squared: {r2:.2f}")
+            linear_model = LinearRegression()
+            linear_model.fit(X_train, y_train)
+
+            y_pred = linear_model.predict(user_df)
+
+            st.write("Predicted Target Value based on User Inputs:")
+            st.write(y_pred)
+
+            mse = mean_squared_error(y_test, y_pred)
+            r2 = r2_score(y_test, y_pred)
+            st.write(f"Mean Squared Error on Test Data: {mse:.2f}")
+            st.write(f"R-squared on Test Data: {r2:.2f}")
+
+    elif enable_user_inputs == "No":
+        if st.button("Apply Linear Regression"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
+
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+            linear_model = LinearRegression()
+            linear_model.fit(X_train, y_train)
+
+            y_pred = linear_model.predict(X_test)
+
+            mse = mean_squared_error(y_test, y_pred)
+            r2 = r2_score(y_test, y_pred)
+            st.write(f"Mean Squared Error on Test Data: {mse:.2f}")
+            st.write(f"R-squared on Test Data: {r2:.2f}")
+
 
 
 def apply_logistic_regression(data):
-    st.sidebar.header("Logistic Regression")
+    st.header("Logistic Regression")
 
-    target_column = st.sidebar.selectbox("Select the target column", data.columns, key="logistic_target_column")
-    feature_columns = st.sidebar.multiselect("Select the feature columns", data.columns, key="logistic_feature_columns")
-    test_size = st.sidebar.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
-    random_state = st.sidebar.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    target_column = st.selectbox("Select the target column", data.columns, key="logistic_target_column")
+    feature_columns = st.multiselect("Select the feature columns", data.columns, key="logistic_feature_columns")
+    test_size = st.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
+    random_state = st.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    enable_user_inputs = st.radio("Enable user inputs", ["Yes", "No"])
 
-    if st.sidebar.button("Apply Logistic Regression"):
-        if len(feature_columns) < 1:
-            st.sidebar.error("Please select at least one feature column.")
-            return
+    if enable_user_inputs == "Yes":
+        # Collect user inputs for each feature column
+        user_inputs = {}
+        for column in feature_columns:
+            user_input = st.number_input(f"Enter value for '{column}'", key=f"logistic_input_{column}")
+            user_inputs[column] = user_input
 
-        X = data[feature_columns]
-        y = data[target_column]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+        if st.button("Apply Logistic Regression"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
 
-        logistic_model = LogisticRegression()
-        logistic_model.fit(X_train, y_train)
+            # Create a DataFrame with user inputs
+            user_df = pd.DataFrame([user_inputs])
 
-        y_pred = logistic_model.predict(X_test)
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-        accuracy = accuracy_score(y_test, y_pred)
-        st.write(f"Accuracy: {accuracy:.2f}")
+            logistic_model = LogisticRegression()
+            logistic_model.fit(X_train, y_train)
 
-        classification_rep = classification_report(y_test, y_pred, output_dict=True)
-        df_classification_rep = pd.DataFrame(classification_rep).transpose()
-        st.write("Classification Report:")
-        st.table(df_classification_rep)
+            y_pred = logistic_model.predict(user_df)
+
+            st.write("Predicted Target Value based on User Inputs:")
+            st.write(y_pred)
+
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy on Test Data: {accuracy:.2f}")
+
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.write("Classification Report on Test Data:")
+            st.table(df_classification_rep)
+
+    elif enable_user_inputs == "No":
+        if st.button("Apply Logistic Regression"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
+
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+            logistic_model = LogisticRegression()
+            logistic_model.fit(X_train, y_train)
+
+            y_pred = logistic_model.predict(X_test)
+
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy on Test Data: {accuracy:.2f}")
+
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.write("Classification Report on Test Data:")
+            st.table(df_classification_rep)
 
 
 def apply_decision_tree(data):
-    st.sidebar.header("Decision Tree")
+    st.header("Decision Tree")
 
-    target_column = st.sidebar.selectbox("Select the target column", data.columns, key="dt_target_column")
-    feature_columns = st.sidebar.multiselect("Select the feature columns", data.columns, key="dt_feature_columns")
-    test_size = st.sidebar.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
-    random_state = st.sidebar.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    target_column = st.selectbox("Select the target column", data.columns, key="dt_target_column")
+    feature_columns = st.multiselect("Select the feature columns", data.columns, key="dt_feature_columns")
+    test_size = st.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
+    random_state = st.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    enable_user_inputs = st.radio("Enable user inputs", ["Yes", "No"])
 
-    if st.sidebar.button("Apply Decision Tree"):
-        if len(feature_columns) < 1:
-            st.sidebar.error("Please select at least one feature column.")
-            return
+    if enable_user_inputs == "Yes":
+        # Collect user inputs for each feature column
+        user_inputs = {}
+        for column in feature_columns:
+            user_input = st.number_input(f"Enter value for '{column}'", key=f"dt_input_{column}")
+            user_inputs[column] = user_input
 
-        X = data[feature_columns]
-        y = data[target_column]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+        if st.button("Apply Decision Tree"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
 
-        dt_model = DecisionTreeClassifier()
-        dt_model.fit(X_train, y_train)
+            # Create a DataFrame with user inputs
+            user_df = pd.DataFrame([user_inputs])
 
-        y_pred = dt_model.predict(X_test)
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-        accuracy = accuracy_score(y_test, y_pred)
-        st.write(f"Accuracy: {accuracy:.2f}")
+            dt_model = DecisionTreeClassifier()
+            dt_model.fit(X_train, y_train)
 
-        classification_rep = classification_report(y_test, y_pred, output_dict=True)
-        df_classification_rep = pd.DataFrame(classification_rep).transpose()
-        st.write("Classification Report:")
-        st.table(df_classification_rep)
+            y_pred = dt_model.predict(user_df)
+
+            st.write("Predicted Target Value based on User Inputs:")
+            st.write(y_pred)
+
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy on Test Data: {accuracy:.2f}")
+
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.write("Classification Report on Test Data:")
+            st.table(df_classification_rep)
+
+    elif enable_user_inputs == "No":
+        if st.button("Apply Decision Tree"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
+
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+            dt_model = DecisionTreeClassifier()
+            dt_model.fit(X_train, y_train)
+
+            y_pred = dt_model.predict(X_test)
+
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy on Test Data: {accuracy:.2f}")
+
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            st.write("Classification Report on Test Data:")
+            st.table(df_classification_rep)
+
 
 
 def apply_random_forest(data):
