@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
-st.beta_set_page_config(hide_menu=True)
+
 st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">', unsafe_allow_html=True)
 
 
@@ -791,7 +791,7 @@ def apply_random_forest(data):
 def footer():
 
   html_temp = """
-  <div style="position: fixed; bottom: 0; width: 100%; text-align: center; font-weight: bold;">
+  <div style="position: fixed; bottom: 50px; width: 100%; text-align: center; font-weight: bold;">
     <p style="margin-bottom: 5px; font-size: 14px;">
       Copyright &copy; Made By <span style="color: #007bff; font-weight: bold;">AliHamzaSultan</span>
       <a href="https://www.linkedin.com/in/ali-hamza-sultan-1ba7ba267/" target="_blank" style="margin-left: 10px;"><i class="fab fa-linkedin" style="font-size: 20px;"></i></a>
