@@ -36,7 +36,7 @@ Experience data visualization like never before with interactive Plotly charts. 
    ```
 
 4. **Access App:**
-   Open the app in your web browser by navigating to [[http://localhost:8501](http://localhost:8501](https://elf9b6ufwck2ezfujqfax2.streamlit.app/)).
+   Open the app in your web browser by navigating to https://elf9b6ufwck2ezfujqfax2.streamlit.app/.
 
 ## Screenshots
 
