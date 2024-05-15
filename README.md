@@ -23,3 +23,61 @@ Experience data visualization like never before with interactive Plotly charts. 
 1. **Clone Repository:**
    ```bash
    git clone https://github.com/yourusername/your-repo.git
+   ```
+
+2. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run Streamlit App:**
+   ```bash
+   streamlit run app.py
+   ```
+
+4. **Access App:**
+   Open the app in your web browser by navigating to [http://localhost:8501](http://localhost:8501).
+
+## Screenshots
+
+![Screenshot 1](https://example.com/screenshot1.png)
+
+*Interactive Dashboard showcasing EDA insights.*
+
+![Screenshot 2](https://example.com/screenshot2.png)
+
+*Data Preprocessing Interface with streamlined functionalities.*
+
+## Directory Structure
+
+```
+├── app.py                # Main application script
+├── requirements.txt      # Python dependencies
+├── data/                 # Directory for storing datasets
+├── models/               # Directory for storing trained models
+├── utils/                # Directory for utility functions
+├── screenshots/          # Directory for screenshots
+└── README.md             # Project documentation
+```
+
+## Dependencies
+
+- Streamlit
+- Plotly
+- Pandas
+- Scikit-learn
+- NumPy
+
+## Contribution Guidelines
+
+Contributions are welcome! Kindly fork the repository and submit a pull request with your enhancements.
+
+## License
+
+This project is licensed under the MIT License. For details, refer to the [LICENSE](LICENSE) file.
+
+## Acknowledgments
+
+- The Streamlit community for their outstanding framework.
+- Plotly developers for creating powerful interactive visualization tools.
+- Scikit-learn developers for pioneering machine learning algorithms.
