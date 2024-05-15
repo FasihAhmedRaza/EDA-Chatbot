@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -17,6 +18,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 state = {'show_result': False, 'knn_inputs': {}, 'user_inputs': {}}
 def main():
     st.title("Hello, World! EDA Streamlit App")
+    st.sidebar.title("Visualize & Preprocess")
+
     
     st.header("Upload your CSV data file")
     data_file = st.file_uploader("Upload CSV", type=["csv"])
@@ -36,53 +39,106 @@ def main():
         st.write("Data overview (first {} rows):".format(num_rows))
         st.write(data.head(num_rows))  # Display the selected number of rows
 
+        st.header("Model Selection")
+
+        model_type = st.selectbox("Select Model", ["KNN Classification", "Naive Bayes", "Linear Regression", "Logistic Regression", "Decision Tree", "Random Forest"])
+
+         
+
+        if model_type == "KNN Classification":
+            apply_knn_classification(data, state)
+        elif model_type == "Naive Bayes":
+            apply_naive_bayes(data)
+        elif model_type == "Linear Regression":
+            apply_linear_regression(data)
+        elif model_type == "Logistic Regression":
+            apply_logistic_regression(data)
+        elif model_type == "Decision Tree":
+            apply_decision_tree(data)
+        elif model_type == "Random Forest":
+            apply_random_forest(data)
+
         st.sidebar.header("Visualizations")
-        plot_options = ["Bar plot", "Scatter plot", "Histogram", "Box plot", "Heatmap"]
+        plot_options = ["Bar plot", "Scatter plot", "Histogram", "Box plot", "Heatmap", "Line plot", "Pie chart", "Area plot", "Violin plot", "Density contour plot"]
         selected_plot = st.sidebar.selectbox("Choose a plot type", plot_options)
         selected_columns = []
-        if selected_plot in ["Bar plot", "Scatter plot"]:
-            selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key="plot_x_axis"))
-            selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key="plot_y_axis"))
+
+        if selected_plot in ["Bar plot", "Scatter plot", "Line plot"]:
+            selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key=f"{selected_plot}_x_axis"))
+            selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key=f"{selected_plot}_y_axis"))
+
         if selected_plot == "Histogram":
             selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="histogram_column"))
 
         if selected_plot == "Box plot":
             selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="boxplot_column"))
 
-        if selected_plot == "Heatmap":
+        if selected_plot == "Pie chart":
+            selected_columns.append(st.sidebar.selectbox("Select a column", data.columns, key="pie_column"))
+
+        if selected_plot == "Area plot":
+            selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key="area_x_axis"))
+            selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key="area_y_axis"))
+
+        if selected_plot == "Violin plot":
+            selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key="violin_x_axis"))
+            selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key="violin_y_axis"))
+
+        if selected_plot == "Density contour plot":
+            selected_columns.append(st.sidebar.selectbox("Select x-axis", data.columns, key="density_x_axis"))
+            selected_columns.append(st.sidebar.selectbox("Select y-axis", data.columns, key="density_y_axis"))
+
+        if selected_plot == "Bar plot":
+            st.write("Bar plot:")
+            fig = px.bar(data, x=selected_columns[0], y=selected_columns[1])
+            st.plotly_chart(fig)
+
+        elif selected_plot == "Scatter plot":
+            st.write("Scatter plot:")
+            fig = px.scatter(data, x=selected_columns[0], y=selected_columns[1])
+            st.plotly_chart(fig)
+
+        elif selected_plot == "Histogram":
+            st.write("Histogram:")
+            fig = px.histogram(data, x=selected_columns[0])
+            st.plotly_chart(fig)
+
+        elif selected_plot == "Box plot":
+            st.write("Box plot:")
+            fig = px.box(data, x=selected_columns[0])
+            st.plotly_chart(fig)
+
+        elif selected_plot == "Heatmap":
             st.write("Heatmap:")
-            fig, ax = plt.subplots()
-            sns.heatmap(data.corr(), annot=True, cmap="coolwarm", fmt=".2f")
-            st.pyplot(fig)
+            fig = px.imshow(data.corr(), color_continuous_scale='thermal')
+            st.plotly_chart(fig)
 
-        if st.sidebar.button("Plot"):
-            st.write(f"{selected_plot}:")
+        elif selected_plot == "Line plot":
+            st.write("Line plot:")
+            fig = px.line(data, x=selected_columns[0], y=selected_columns[1])
+            st.plotly_chart(fig)
 
-            plot_requirements = {
-                "Bar plot": "Two numeric columns are required. One for the x-axis and one for the y-axis.",
-                "Scatter plot": "Two numeric columns are required. One for the x-axis and one for the y-axis.",
-                "Histogram": "One numeric column is required.",
-                "Box plot": "One numeric column is required."
-            }
-            st.write(f"Data requirements for {selected_plot}:")
-            st.write(plot_requirements[selected_plot])
+        elif selected_plot == "Pie chart":
+            st.write("Pie chart:")
+            fig = px.pie(data, names=selected_columns[0])
+            st.plotly_chart(fig)
 
-            if data[selected_columns[0]].dtype == 'object' or data[selected_columns[1]].dtype == 'object':
-                st.warning("Please change the data type of selected columns to numeric for plotting.")
-            else:
-                fig, ax = plt.subplots()
-                try:
-                    if selected_plot == "Bar plot":
-                        sns.barplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
-                    elif selected_plot == "Scatter plot":
-                        sns.scatterplot(x=data[selected_columns[0]], y=data[selected_columns[1]], ax=ax)
-                    elif selected_plot == "Histogram":
-                        sns.histplot(data[selected_columns[0]], bins=20, ax=ax)
-                    elif selected_plot == "Box plot":
-                        sns.boxplot(data[selected_columns[0]], ax=ax)
-                    st.pyplot(fig)
-                except ValueError as e:
-                    st.error(f"An error occurred: {str(e)}. Please check your data and selected columns.")
+        elif selected_plot == "Area plot":
+            st.write("Area plot:")
+            fig = px.area(data, x=selected_columns[0], y=selected_columns[1])
+            st.plotly_chart(fig)
+
+        elif selected_plot == "Violin plot":
+            st.write("Violin plot:")
+            fig = px.violin(data, x=selected_columns[0], y=selected_columns[1])
+            st.plotly_chart(fig)
+
+        elif selected_plot == "Density contour plot":
+            st.write("Density contour plot:")
+            fig = px.density_contour(data, x=selected_columns[0], y=selected_columns[1])
+            st.plotly_chart(fig)
+
+
 
         display_null_values_and_datatype(data)
 
@@ -90,8 +146,8 @@ def main():
         drop_null_values_section(data)
         rename_column_section(data)
         change_data_type_section(data)
-        model_section(data)
         normalization_section(data)
+        replace_column_value(data)
 
 
 def display_null_values_and_datatype(data):
@@ -147,21 +203,7 @@ def change_data_type_section(data):
         display_null_values_and_datatype(data)
 
 
-def model_section(data):
-    model_type = st.sidebar.selectbox("Select Model", ["KNN Classification", "Naive Bayes", "Linear Regression", "Logistic Regression", "Decision Tree", "Random Forest"])
 
-    if model_type == "KNN Classification":
-        apply_knn_classification(data, state)
-    elif model_type == "Naive Bayes":
-        apply_naive_bayes(data)
-    elif model_type == "Linear Regression":
-        apply_linear_regression(data)
-    elif model_type == "Logistic Regression":
-        apply_logistic_regression(data)
-    elif model_type == "Decision Tree":
-        apply_decision_tree(data)
-    elif model_type == "Random Forest":
-        apply_random_forest(data)
 
 
 def normalization_section(data):
@@ -245,6 +287,45 @@ def change_data_type(data, column, new_type):
 
     data[column] = data[column].astype(new_type)
     return data
+def replace_column_value(data):
+    st.sidebar.header("Replace Value in Column")
+    column_to_replace = st.sidebar.selectbox("Select a column", data.columns, key="replace_column_select")
+    value_to_replace = st.sidebar.text_input("Enter value to replace", key="replace_value_input")
+    replace_with = st.sidebar.text_input("Replace with", key="replace_with_input")
+
+    if st.sidebar.button("Replace Value"):
+        # Convert the value to the same data type as in the dataset
+        dtype = data[column_to_replace].dtype
+        try:
+            if dtype == 'object':
+                value_to_replace = str(value_to_replace)
+            elif dtype == 'int64':
+                value_to_replace = int(value_to_replace)
+            elif dtype == 'float64':
+                value_to_replace = float(value_to_replace)
+            elif dtype == 'bool':
+                value_to_replace = bool(value_to_replace)
+            elif dtype == 'datetime64':
+                value_to_replace = pd.to_datetime(value_to_replace)
+        except ValueError:
+            st.sidebar.error("Failed to convert the value to the correct data type.")
+            return
+
+        # Check if the value to be replaced exists in the selected column
+        if value_to_replace not in data[column_to_replace].values:
+            st.sidebar.error(f"The value '{value_to_replace}' does not exist in column '{column_to_replace}'.")
+            return
+
+        # Replace the value in the selected column
+        data[column_to_replace].replace(value_to_replace, replace_with, inplace=True)
+
+        # Display success message
+        st.sidebar.success(f"Value '{value_to_replace}' in column '{column_to_replace}' replaced with '{replace_with}' successfully.")
+
+        # Display the updated DataFrame
+        st.write("Data overview (after replacing value):")
+        st.write(data.head())  # Display the updated DataFrame
+
 
 def apply_knn_classification(data, state):
     if 'show_result' not in state:
@@ -628,39 +709,81 @@ def apply_decision_tree(data):
 
 
 def apply_random_forest(data):
-    st.sidebar.header("Random Forest")
+    st.header("Random Forest")
 
-    target_column = st.sidebar.selectbox("Select the target column", data.columns, key="rf_target_column")
-    feature_columns = st.sidebar.multiselect("Select the feature columns", data.columns, key="rf_feature_columns")
-    test_size = st.sidebar.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
-    random_state = st.sidebar.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
-    n_estimators = st.sidebar.slider("Select the number of estimators", min_value=1, max_value=100, value=10, step=1)
+    target_column = st.selectbox("Select the target column", data.columns, key="rf_target_column")
+    feature_columns = st.multiselect("Select the feature columns", data.columns, key="rf_feature_columns")
+    test_size = st.slider("Select test size", min_value=0.1, max_value=0.5, value=0.2, step=0.05)
+    random_state = st.slider("Select random state", min_value=0, max_value=100, value=42, step=1)
+    n_estimators = st.slider("Select the number of estimators", min_value=1, max_value=100, value=10, step=1)
+    enable_user_inputs = st.radio("Enable user inputs", ["Yes", "No"])
 
-    if st.sidebar.button("Apply Random Forest"):
-        if len(feature_columns) < 1:
-            st.sidebar.error("Please select at least one feature column.")
-            return
+    if enable_user_inputs == "Yes":
+        # Collect user inputs for each feature column
+        user_inputs = {}
+        for column in feature_columns:
+            user_input = st.number_input(f"Enter value for '{column}'", key=f"rf_input_{column}")
+            user_inputs[column] = user_input
 
-        X = data[feature_columns]
-        y = data[target_column]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+        if st.button("Apply Random Forest"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
 
-        rf_model = RandomForestClassifier(n_estimators=n_estimators)
-        rf_model.fit(X_train, y_train)
+            # Create a DataFrame with user inputs
+            user_df = pd.DataFrame([user_inputs])
 
-        y_pred = rf_model.predict(X_test)
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-        accuracy = accuracy_score(y_test, y_pred)
-        st.write(f"Accuracy: {accuracy:.2f}")
+            rf_model = RandomForestClassifier(n_estimators=n_estimators)
+            rf_model.fit(X_train, y_train)
 
-        classification_rep = classification_report(y_test, y_pred, output_dict=True)
-        df_classification_rep = pd.DataFrame(classification_rep).transpose()
+            y_pred = rf_model.predict(user_df)
 
-        # Convert the "support" column to integers
-        df_classification_rep["support"] = df_classification_rep["support"].astype(int)
+            st.write("Predicted Target Value based on User Inputs:")
+            st.write(y_pred)
 
-        st.write("Classification Report:")
-        st.table(df_classification_rep)
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy on Test Data: {accuracy:.2f}")
+
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+
+            # Convert the "support" column to integers
+            df_classification_rep["support"] = df_classification_rep["support"].astype(int)
+
+            st.write("Classification Report on Test Data:")
+            st.table(df_classification_rep)
+
+    elif enable_user_inputs == "No":
+        if st.button("Apply Random Forest"):
+            if len(feature_columns) < 1:
+                st.error("Please select at least one feature column.")
+                return
+
+            X = data[feature_columns]
+            y = data[target_column]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+            rf_model = RandomForestClassifier(n_estimators=n_estimators)
+            rf_model.fit(X_train, y_train)
+
+            y_pred = rf_model.predict(X_test)
+
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write(f"Accuracy on Test Data: {accuracy:.2f}")
+
+            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+            df_classification_rep = pd.DataFrame(classification_rep).transpose()
+
+            # Convert the "support" column to integers
+            df_classification_rep["support"] = df_classification_rep["support"].astype(int)
+
+            st.write("Classification Report on Test Data:")
+            st.table(df_classification_rep)
+
 
 if __name__ == "__main__":
     main()
