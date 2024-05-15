@@ -12,12 +12,13 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
+st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">', unsafe_allow_html=True)
 
 
 
 state = {'show_result': False, 'knn_inputs': {}, 'user_inputs': {}}
 def main():
-    st.title("Hey, Analyst! EDA Streamlit App")
+    st.title("Hello, World! EDA Streamlit App")
     st.sidebar.title("Visualize & Preprocess")
 
     
@@ -59,7 +60,7 @@ def main():
             apply_random_forest(data)
 
         st.sidebar.header("Visualizations")
-        plot_options = ["Bar plot", "Scatter plot", "Histogram", "Box plot", "Heatmap", "Line plot", "Pie chart", "Area plot", "Violin plot", "Density contour plot"]
+        plot_options = ["Bar plot", "Scatter plot", "Histogram", "Box plot", "Heatmap", "Line plot", "Pie chart", "Area plot", "Violin plot", "Density contour plot","Map plot"]
         selected_plot = st.sidebar.selectbox("Choose a plot type", plot_options)
         selected_columns = []
 
@@ -92,6 +93,7 @@ def main():
             st.write("Bar plot:")
             fig = px.bar(data, x=selected_columns[0], y=selected_columns[1])
             st.plotly_chart(fig)
+
 
         elif selected_plot == "Scatter plot":
             st.write("Scatter plot:")
@@ -783,6 +785,22 @@ def apply_random_forest(data):
 
             st.write("Classification Report on Test Data:")
             st.table(df_classification_rep)
+
+
+def footer():
+
+  html_temp = """
+  <div style="position: fixed; bottom: 0; width: 100%; text-align: center; font-weight: bold;">
+    <p style="margin-bottom: 5px; font-size: 14px;">
+      Copyright &copy; Made By <span style="color: #007bff; font-weight: bold;">AliHamzaSultan</span>
+      <a href="https://www.linkedin.com/in/ali-hamza-sultan-1ba7ba267/" target="_blank" style="margin-left: 10px;"><i class="fab fa-linkedin" style="font-size: 20px;"></i></a>
+      <a href="https://github.com/alihamzasultan" target="_blank"><i class="fab fa-github" style="font-size: 20px; margin-left: 10px;"></i></a>
+    </p>
+  </div>
+  """
+  st.markdown(html_temp, unsafe_allow_html=True)
+
+footer()
 
 
 if __name__ == "__main__":
