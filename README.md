@@ -36,15 +36,15 @@ Experience data visualization like never before with interactive Plotly charts. 
    ```
 
 4. **Access App:**
-   Open the app in your web browser by navigating to https://elf9b6ufwck2ezfujqfax2.streamlit.app/.
+   Open the app in your web browser by navigating to (https://elf9b6ufwck2ezfujqfax2.streamlit.app/).
 
 ## Screenshots
 
-![Screenshot 1](screenshots/1.png)
+![Screenshot 1](screenshots/1.PNG)
 
 *Interactive Dashboard showcasing EDA insights.*
 
-![Screenshot 2](screenshots/2.png)
+![Screenshot 2](screenshots/2.PNG)
 
 *Data Preprocessing Interface with streamlined functionalities.*
 
@@ -62,9 +62,7 @@ Experience data visualization like never before with interactive Plotly charts. 
 
 Contributions are welcome! Kindly fork the repository and submit a pull request with your enhancements.
 
-## License
 
-This project is licensed under the MIT License. For details, refer to the [LICENSE](LICENSE) file.
 
 ## Acknowledgments
 
