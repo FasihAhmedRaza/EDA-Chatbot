@@ -40,11 +40,11 @@ Experience data visualization like never before with interactive Plotly charts. 
 
 ## Screenshots
 
-![Screenshot 1](https://example.com/screenshot1.png)
+![Screenshot 1](screenshots/1.png)
 
 *Interactive Dashboard showcasing EDA insights.*
 
-![Screenshot 2](https://example.com/screenshot2.png)
+![Screenshot 2](screenshots/2.png)
 
 *Data Preprocessing Interface with streamlined functionalities.*
 
