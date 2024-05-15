@@ -48,6 +48,14 @@ Experience data visualization like never before with interactive Plotly charts. 
 
 *Data Preprocessing Interface with streamlined functionalities.*
 
+![Screenshot 1](screenshots/3.PNG)
+
+*Interactive  visuals.*
+
+![Screenshot 2](screenshots/4.PNG)
+
+*prediction functionalities.*
+
 
 
 ## Dependencies
