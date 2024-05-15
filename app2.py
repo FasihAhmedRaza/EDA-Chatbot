@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
 state = {'show_result': False, 'knn_inputs': {}, 'user_inputs': {}}
 def main():
-    st.title("Hello, World! EDA Streamlit App")
+    st.title("Hey, Analyst! EDA Streamlit App")
     st.sidebar.title("Visualize & Preprocess")
 
     
