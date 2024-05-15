@@ -36,7 +36,7 @@ Experience data visualization like never before with interactive Plotly charts. 
    ```
 
 4. **Access App:**
-   Open the app in your web browser by navigating to [http://localhost:8501](http://localhost:8501).
+   Open the app in your web browser by navigating to [[http://localhost:8501](http://localhost:8501](https://elf9b6ufwck2ezfujqfax2.streamlit.app/)).
 
 ## Screenshots
 
@@ -48,17 +48,7 @@ Experience data visualization like never before with interactive Plotly charts. 
 
 *Data Preprocessing Interface with streamlined functionalities.*
 
-## Directory Structure
 
-```
-├── app.py                # Main application script
-├── requirements.txt      # Python dependencies
-├── data/                 # Directory for storing datasets
-├── models/               # Directory for storing trained models
-├── utils/                # Directory for utility functions
-├── screenshots/          # Directory for screenshots
-└── README.md             # Project documentation
-```
 
 ## Dependencies
 
