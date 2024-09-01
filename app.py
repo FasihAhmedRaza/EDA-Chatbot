@@ -793,9 +793,9 @@ def footer():
   html_temp = """
   <div style="position: fixed; bottom: 50px; width: 100%; text-align: center; font-weight: bold;">
     <p style="margin-bottom: 5px; font-size: 14px;">
-      Copyright &copy; Made By <span style="color: #007bff; font-weight: bold;">AliHamzaSultan</span>
-      <a href="https://www.linkedin.com/in/ali-hamza-sultan-1ba7ba267/" target="_blank" style="margin-left: 10px;"><i class="fab fa-linkedin" style="font-size: 20px;"></i></a>
-      <a href="https://github.com/alihamzasultan" target="_blank"><i class="fab fa-github" style="font-size: 20px; margin-left: 10px;"></i></a>
+      Copyright &copy; Made By <span style="color: #007bff; font-weight: bold;">Fasih Ahmed </span>
+      <a href="https://www.linkedin.com/in/thisfasih/" target="_blank" style="margin-left: 10px;"><i class="fab fa-linkedin" style="font-size: 20px;"></i></a>
+      <a href="https://github.com/FasihAhmedRaza" target="_blank"><i class="fab fa-github" style="font-size: 20px; margin-left: 10px;"></i></a>
     </p>
   </div>
   """
